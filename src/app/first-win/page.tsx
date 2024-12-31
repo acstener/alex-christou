@@ -1,4 +1,52 @@
+'use client';
+import React from 'react';
+
 export default function FirstWin() {
+  const [email, setEmail] = React.useState('');
+  const [status, setStatus] = React.useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = React.useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Form submitted with email:', email);
+    
+    if (!email) {
+      setStatus('error');
+      setMessage('Please enter an email address');
+      return;
+    }
+
+    setStatus('loading');
+    setMessage('');
+
+    try {
+      console.log('Making API request...');
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      console.log('Response status:', response.status);
+      const data = await response.json();
+      console.log('Response data:', data);
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to subscribe');
+      }
+
+      setStatus('success');
+      setMessage(data.message || 'Successfully subscribed!');
+      setEmail('');
+    } catch (error) {
+      console.error('Subscription error:', error);
+      setStatus('error');
+      setMessage(error instanceof Error ? error.message : 'Something went wrong');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-3xl mx-auto px-4 py-20 sm:px-6 lg:px-8">
@@ -90,21 +138,36 @@ export default function FirstWin() {
             </li>
           </ul>
 
-          <form className="max-w-md mx-auto">
+          <form onSubmit={handleSubmit} className="max-w-md mx-auto">
             <div className="flex gap-3">
               <input
                 type="email"
                 placeholder="Enter your email"
                 className="flex-1 min-w-0 px-4 py-3 text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 required
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (status === 'error') {
+                    setStatus('idle');
+                    setMessage('');
+                  }
+                }}
+                disabled={status === 'loading'}
               />
               <button
                 type="submit"
-                className="px-8 py-3 text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors duration-200"
+                className="px-8 py-3 text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={status === 'loading'}
               >
-                Join
+                {status === 'loading' ? 'Joining...' : 'Join'}
               </button>
             </div>
+            {message && (
+              <p className={`text-sm text-center mt-4 ${status === 'success' ? 'text-emerald-600' : 'text-red-600'}`}>
+                {message}
+              </p>
+            )}
           </form>
 
           <p className="text-sm text-gray-500 text-center mt-6">

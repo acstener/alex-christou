@@ -12,7 +12,7 @@ export default function Home() {
         
         <div className="text-lg">
           <p>
-            I&apos;m building with AI and no code and sharing my learnings.
+            I&apos;m building with AI and no-code. Sharing my learnings
           </p>
           <p className="mb-6">
               Find me on{" "}

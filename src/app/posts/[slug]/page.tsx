@@ -4,6 +4,12 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import ConvertKitForm from '@/app/components/ConvertKitForm'
 
+type BlogPostParams = {
+  params: {
+    slug: string;
+  };
+};
+
 export async function generateStaticParams() {
   const posts = await getPosts()
   return posts.map((post) => ({
@@ -11,7 +17,7 @@ export async function generateStaticParams() {
   }))
 }
 
-export default async function BlogPost({ params }: { params: { slug: string } }) {
+export default async function BlogPost({ params }: BlogPostParams) {
   const { slug } = params
   const post = await getPost(slug)
   

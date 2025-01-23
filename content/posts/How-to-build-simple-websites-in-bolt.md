@@ -1,9 +1,11 @@
 ---
-title: How to build simple websites in Bolt/Lovabale (Not web apps)?
+title: How to build simple websites in Bolt/Lovabale (Not web apps)
 date: '2024-01-23'
 ---
 
 # How to Get AI Tools to Build Actual Websites (Not Web Apps)
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/YnmJEHS-1Kg?si=IVOnYMK8IjP6sCGJ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 Here's a quick one that'll save you some headaches when working with AI website builders like Bolt.
 

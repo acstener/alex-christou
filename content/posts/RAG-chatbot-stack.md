@@ -6,6 +6,8 @@ date: '2024-01-14'
 
 # Building a RAG-Powered Chatbot: The No-BS Stack
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/qXB28xfFXwY?si=c2D4U2uTADwRu4rw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 Want to build a RAG chatbot? Here's your stack - no fluff, just what works:
 
 ## The Core Stack

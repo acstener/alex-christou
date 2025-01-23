@@ -3,6 +3,8 @@ title: As a PM getting into code, what route or stack would you advise?
 date: '2024-01-14'
 ---
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/1TFcyHZD_eo?si=l0Aa86b_HxRIWV2Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 # The Fast Track: A PM's Guide to Getting Into Code
 
 Most PMs already understand how software works - you've shipped products, worked with engineers. That's your advantage. Use it.

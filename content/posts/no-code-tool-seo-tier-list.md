@@ -1,6 +1,8 @@
 ---
 title: No-Code SEO in 2025 - The Tier List
 date: '2024-01-23'
+description: "A comprehensive ranking of no-code platforms based on their SEO capabilities, from industry-leading solutions to platforms that need improvement"
+tags: ["seo", "no-code", "webflow", "wordpress", "shopify", "framer", "review", "comparison"]
 youtubeId: 'YEf3dddvy5g'
 ---
 

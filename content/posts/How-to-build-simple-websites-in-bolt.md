@@ -1,6 +1,8 @@
 ---
 title: How to build simple websites in Bolt/Lovabale (Not web apps)
 date: '2024-01-23'
+description: "Learn how to get AI tools to generate clean, static websites instead of over-engineered web apps by using the right prompting technique"
+tags: ["ai", "web-development", "bolt", "lovable", "static-sites", "tips", "no-code"]
 ---
 
 # How to Get AI Tools to Build Actual Websites (Not Web Apps)

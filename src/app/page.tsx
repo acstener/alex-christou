@@ -1,49 +1,60 @@
-'use client';
 import React from 'react';
 import ConvertKitForm from './components/ConvertKitForm';
 import Link from 'next/link';
+import { getPosts } from '@/lib/blog';
 
-export default function Home() {
+export default async function Home() {
+  const posts = await getPosts();
+  const recentPosts = posts.slice(0, 5);
+
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-2xl mx-auto px-4 py-20">
-        <h1 className="text-4xl font-bold mb-12">
+      <div className="max-w-2xl mx-auto px-4 py-16">
+        <h1 className="text-3xl font-bold mb-8">
           Yo, I&apos;m Alex
         </h1>
         
-        <div className="text-lg">
-          <p>
+        <div>
+          <p className="text-base">
             I&apos;m building with AI and no-code. Sharing my learnings
           </p>
-          <p className="mb-6">
+          <p className="mb-10 text-base">
             Find me on{" "}
             <a href="https://twitter.com/alexchristou_" className="underline hover:text-gray-600" target="_blank" rel="noopener noreferrer">X</a>
             {" "}and{" "}
             <a href="https://www.youtube.com/@alexchristou_" className="underline hover:text-gray-600" target="_blank" rel="noopener noreferrer">YouTube</a>
           </p>
 
-          <div className="mt-8">
-            <ConvertKitForm />
-          </div>
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-xl font-bold mb-4 text-pink-500">LATEST ARTICLES</h2>
+              <ul className="space-y-3">
+                {recentPosts.map((post) => (
+                  <li key={post.slug} className="flex items-start">
+                    <span className="text-pink-500 mr-2 mt-1">―</span>
+                    <Link 
+                      href={`/posts/${post.slug}`}
+                      className="text-base hover:underline"
+                    >
+                      {post.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div className="mt-16 pt-16 border-t space-y-16">
-            <a href="/first-win" className="block space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Coming soon</span>
-                <span>→</span>
-              </div>
-              <h3 className="text-xl font-bold">Stop Watching AI Demos</h3>
-              <p>Your first win. Learn how to ship your first AI-powered prototype in hours.</p>
-            </a>
+            <div>
+              <Link 
+                href="/posts" 
+                className="text-base hover:underline"
+              >
+                More articles
+              </Link>
+            </div>
 
-            <Link href="/posts" className="block space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Blog</span>
-                <span>→</span>
-              </div>
-              <h3 className="text-xl font-bold">Check out some of the recent posts</h3>
-              <p>Thoughts and learnings about AI andno-code</p>
-            </Link>
+            <div className="pt-8 border-t">
+              <ConvertKitForm />
+            </div>
           </div>
         </div>
       </div>

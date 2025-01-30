@@ -7,6 +7,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Alex Christou",
   description: "Building with AI and no-code, sharing learnings along the way.",
+  metadataBase: new URL('https://alexchristou.com'),
 };
 
 export default function RootLayout({

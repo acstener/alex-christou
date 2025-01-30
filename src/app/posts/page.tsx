@@ -1,5 +1,22 @@
 import Link from 'next/link'
 import { getPosts } from '@/lib/blog'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Blog Posts | Alex Christou',
+  description: 'Thoughts and learnings about AI and no-code development, product building, and tech entrepreneurship.',
+  openGraph: {
+    title: 'Blog Posts | Alex Christou',
+    description: 'Thoughts and learnings about AI and no-code development, product building, and tech entrepreneurship.',
+    type: 'website'
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Blog Posts | Alex Christou',
+    description: 'Thoughts and learnings about AI and no-code development, product building, and tech entrepreneurship.',
+    creator: '@alexchristou_'
+  }
+}
 
 export default async function PostsPage() {
   const posts = await getPosts()

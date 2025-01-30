@@ -1,6 +1,8 @@
 ---
 title: Building a RAG-Powered Chatbot - The No-BS Stack
 date: '2024-01-14'
+description: "A straightforward guide to building a RAG chatbot using Vercel AI SDK, Next.js, and Supabase - the essential stack without unnecessary complexity"
+tags: ["ai", "chatbot", "rag", "vercel", "nextjs", "supabase", "development"]
 ---
 
 

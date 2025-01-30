@@ -5,6 +5,8 @@ date: '2024-01-30'
 
 # Automate Your Technical SEO with Cursor Agent
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/JngVK8AkTm0?si=lBZq0iTaFNtAjfcq" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 Let's be honest - technical SEO can be a proper pain. There are hundreds of small details to tweak, tags to add, and configurations to sort out. And when your Search Console is looking a bit sad, going through all of that manually isn't exactly thrilling.
 
 I recently found myself in this exact situation with a new blog. Instead of spending hours tweaking things manually, I discovered a much smarter approach using Cursor Agent. Here's how you can let AI handle your technical SEO heavy lifting.

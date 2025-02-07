@@ -1,6 +1,6 @@
 ---
-title: How I Use Cursor Without Being knowing code
-date: '2024-02-06'
+title: How I Use Cursor Without knowing code
+date: '2024-02-07'
 ---
 
 # How I Use Cursor Without Actually Writing Code

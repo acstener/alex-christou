@@ -1,29 +1,20 @@
-# WebStyle Implementation Guide - Phase 1
+# WebStyle Implementation Guide - Phase 2
 
-This guide covers the initial implementation of the WebStyle tool, focusing on setting up the core infrastructure, API routes, and a minimal UI that matches your existing website style.
+In this phase, we'll integrate the actual ScreenshotOne API and Vision AI, and enhance the UI to properly display the results.
 
-## 1. Project Structure Setup
+## 1. API Keys Setup
 
-First, create the necessary directories and files:
+First, update your `.env.local` file with actual API keys:
 
 ```bash
-# Create component directory if it doesn't exist
-mkdir -p src/components
-
-# Create API route directories
-mkdir -p src/app/api/screenshot
-
-# Create page route for the tool
-mkdir -p src/app/webstyle
+# API Keys
+SCREENSHOT_API_KEY=1B3JZ-VnG6OTpA
+OPENAI_API_KEY=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
 ```
 
-## 2. API Route Implementation
+## 2. Enhance the Screenshot API Route
 
-Create the basic screenshot API endpoint:
-
-### 2.1. Create the Screenshot API Route
-
-Create `src/app/api/screenshot/route.ts`:
+Update `src/app/api/screenshot/route.ts` to integrate with the ScreenshotOne API:
 
 ```typescript
 import { NextResponse } from 'next/server';
@@ -37,13 +28,45 @@ export async function POST(request: Request) {
   }
   
   try {
-    // For Phase 1, we'll just return a mock response
-    // This will be replaced with actual ScreenshotOne API in Phase 2
+    // Call ScreenshotOne API with your access key
+    const accessKey = process.env.SCREENSHOT_API_KEY; // This is "1B3JZ-VnG6OTpA"
+    const screenshotUrl = new URL('https://api.screenshotone.com/take');
+    
+    // Add query parameters as per the ScreenshotOne documentation
+    screenshotUrl.searchParams.append('access_key', accessKey as string);
+    screenshotUrl.searchParams.append('url', url);
+    screenshotUrl.searchParams.append('format', 'jpg');
+    screenshotUrl.searchParams.append('viewport_width', '1280');
+    screenshotUrl.searchParams.append('viewport_height', '800');
+    screenshotUrl.searchParams.append('response_type', 'json'); // Get both image and metadata
+    
+    console.log('Requesting screenshot from:', screenshotUrl.toString());
+    
+    const screenshotResponse = await fetch(screenshotUrl.toString(), {
+      method: 'GET',
+    });
+    
+    if (!screenshotResponse.ok) {
+      const errorData = await screenshotResponse.json().catch(() => ({}));
+      console.error('Screenshot API error:', errorData);
+      return NextResponse.json(
+        { error: 'Failed to capture screenshot' }, 
+        { status: 500 }
+      );
+    }
+    
+    const screenshotData = await screenshotResponse.json();
+    console.log('Screenshot API response:', screenshotData);
+    
+    // For Phase 2, we'll just return the screenshot data
+    // In Phase 3, we'll integrate Vision AI
     return NextResponse.json({
       success: true,
-      message: 'API route working correctly',
-      url: url,
-      // In Phase 2, we'll return actual screenshot and style guide
+      screenshot: screenshotData.url,
+      metadata: {
+        url: url,
+        capturedAt: new Date().toISOString()
+      }
     });
   } catch (error) {
     console.error('Error:', error);
@@ -55,34 +78,24 @@ export async function POST(request: Request) {
 }
 ```
 
-## 3. Environment Configuration
+## 3. Enhance the WebStyleForm Component
 
-### 3.1. Set Up Environment Variables
-
-Create a `.env.local` file in the project root:
-
-```bash
-# API Keys - will be used in Phase 2
-SCREENSHOT_API_KEY=placeholder_for_phase_1
-OPENAI_API_KEY=placeholder_for_phase_1
-```
-
-## 4. UI Component Implementation
-
-### 4.1. Create URL Input Component
-
-Create `src/components/WebStyleForm.tsx`:
+Update `src/components/WebStyleForm.tsx` to display the screenshot:
 
 ```typescript
 'use client';
 
 import { useState } from 'react';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2, Download, Copy } from 'lucide-react';
 
 export default function WebStyleForm() {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [response, setResponse] = useState<any>(null);
+  const [result, setResult] = useState<{
+    screenshot?: string;
+    styleGuide?: string;
+    metadata?: any;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -105,11 +118,23 @@ export default function WebStyleForm() {
       }
 
       const data = await response.json();
-      setResponse(data);
+      setResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Function to handle image download
+  const handleDownload = () => {
+    if (result?.screenshot) {
+      const link = document.createElement('a');
+      link.href = result.screenshot;
+      link.download = `${url.replace(/[^a-z0-9]/gi, '_')}_screenshot.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
@@ -150,12 +175,28 @@ export default function WebStyleForm() {
         </div>
       )}
 
-      {response && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-          <h3 className="text-lg font-medium mb-2">API Response (Phase 1 Debug)</h3>
-          <pre className="bg-white border border-gray-300 rounded-lg p-4 overflow-x-auto text-sm">
-            {JSON.stringify(response, null, 2)}
-          </pre>
+      {result?.screenshot && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-medium">Website Screenshot</h3>
+            <button
+              onClick={handleDownload}
+              className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
+            >
+              <Download className="h-4 w-4" /> Save Image
+            </button>
+          </div>
+          <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
+            <img 
+              src={result.screenshot} 
+              alt="Website Screenshot" 
+              className="w-full h-auto"
+            />
+          </div>
+          <div className="mt-4 text-sm text-gray-500">
+            <p>Source URL: {url}</p>
+            <p>Captured: {result.metadata?.capturedAt ? new Date(result.metadata.capturedAt).toLocaleString() : 'Unknown'}</p>
+          </div>
         </div>
       )}
     </div>
@@ -163,62 +204,34 @@ export default function WebStyleForm() {
 }
 ```
 
-### 4.2. Create Page Component
+## 4. Testing Phase 2
 
-Create `src/app/webstyle/page.tsx`:
-
-```typescript
-import WebStyleForm from '@/components/WebStyleForm';
-
-export const metadata = {
-  title: 'WebStyle - Design Style Guide Generator',
-  description: 'Generate design style guides from websites with AI',
-};
-
-export default function WebStylePage() {
-  return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-2 text-gray-900">WebStyle</h1>
-        <p className="text-gray-600 mb-8">Generate design style guides from websites with AI</p>
-        
-        <WebStyleForm />
-      </div>
-    </main>
-  );
-}
-```
-
-## 5. Testing Phase 1
-
-1. Start your development server:
+1. Make sure you've updated the `.env.local` file with your actual ScreenshotOne API key
+2. Start your development server:
    ```bash
    npm run dev
    ```
+3. Navigate to `http://localhost:3000/webstyle`
+4. Test the form by entering a URL and submitting it
+5. Verify that the API returns an actual screenshot and displays it in the UI
 
-2. Navigate to `http://localhost:3000/webstyle`
+## 5. Expected Results for Phase 2
 
-3. Test the form by entering a URL and submitting it
+At the end of Phase 2, you should have:
 
-4. Verify that the API route is working correctly by checking the response in the UI
+- A working integration with the ScreenshotOne API
+- The ability to capture screenshots of any website
+- A UI that displays the captured screenshot with metadata
+- Option to download the screenshot
 
-## 6. Expected Results for Phase 1
+## Next Steps (For Phase 3)
 
-At the end of Phase 1, you should have:
-
-- A working page at `/webstyle` with a form to input a website URL
-- A basic API endpoint at `/api/screenshot` that receives the URL and returns a placeholder response
-- A clean UI that matches your website's existing style
-- Error handling for basic validation issues
-
-## Next Steps (For Phase 2)
-
-- Integrate with ScreenshotOne API to capture actual screenshots
 - Integrate with Vision AI to analyze screenshots and generate style guides
-- Enhance UI to display screenshots and style guides in a user-friendly way
+- Enhance the UI to display style guides in a user-friendly way
+- Add copy-to-clipboard functionality for the style guide
 
-## Troubleshooting Phase 1
+## Troubleshooting Phase 2
 
-- If the API route returns 404, ensure that your Next.js app router is set up correctly
-- If the form doesn't submit, check browser console for errors
-- If styling doesn't match your existing site, you may need to adjust the Tailwind classes 
+- If you receive a 401 or 403 error, verify your ScreenshotOne API key
+- If screenshots aren't loading, check the console for any CORS issues
+- If the API response is unexpected, log the raw response for debugging

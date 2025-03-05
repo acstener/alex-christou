@@ -7,6 +7,8 @@ import LoadingState from './LoadingState';
 
 export default function WebStyleForm() {
   const [url, setUrl] = useState('');
+  const [normalizedUrl, setNormalizedUrl] = useState('');
+  const [isValidUrl, setIsValidUrl] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStage, setLoadingStage] = useState<'screenshot' | 'analysis' | null>(null);
   const [result, setResult] = useState<{
@@ -21,8 +23,54 @@ export default function WebStyleForm() {
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
 
+  // Function to validate URL format
+  const isValidUrlFormat = (url: string): boolean => {
+    // Basic URL format check
+    const urlPattern = /^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
+    return urlPattern.test(url.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, ''));
+  };
+
+  // Function to normalize URL
+  const normalizeUrl = (inputUrl: string): string => {
+    let normalizedUrl = inputUrl.trim().toLowerCase();
+    
+    // Remove any existing protocol and www
+    normalizedUrl = normalizedUrl.replace(/^(https?:\/\/)?(www\.)?/, '');
+    
+    // Remove any trailing slashes
+    normalizedUrl = normalizedUrl.replace(/\/$/, '');
+    
+    // Check if the URL is valid
+    if (!isValidUrlFormat(normalizedUrl)) {
+      return '';
+    }
+    
+    // Add www. if it's not there
+    if (!normalizedUrl.startsWith('www.')) {
+      normalizedUrl = 'www.' + normalizedUrl;
+    }
+    
+    // Add https:// protocol
+    normalizedUrl = 'https://' + normalizedUrl;
+    
+    return normalizedUrl;
+  };
+
+  // Handle URL input change
+  const handleUrlChange = (inputValue: string) => {
+    setUrl(inputValue);
+    
+    // Try to normalize the URL
+    const normalized = normalizeUrl(inputValue);
+    setNormalizedUrl(normalized);
+    setIsValidUrl(!!normalized);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isValidUrl) return;
+    
     setIsLoading(true);
     setError(null);
     setAnalysisError(null);
@@ -31,7 +79,7 @@ export default function WebStyleForm() {
     setLoadingStage('screenshot');
     
     try {
-      console.log('Submitting request for URL:', url);
+      console.log('Submitting request for URL:', normalizedUrl);
       
       // Step 1: Get the screenshot
       console.log('Step 1: Requesting screenshot from API...');
@@ -40,7 +88,7 @@ export default function WebStyleForm() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url: normalizedUrl }),
       });
 
       const screenshotData = await screenshotResponse.json();
@@ -165,21 +213,39 @@ export default function WebStyleForm() {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <form onSubmit={handleSubmit} className="mb-6">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="Enter website URL (e.g., https://example.com)"
-            className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-800"
-            required
-            disabled={isLoading}
-          />
+      <form onSubmit={handleSubmit} className="mb-16">
+        <div className="flex flex-col sm:flex-row gap-3 mb-8">
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={url}
+              onChange={(e) => handleUrlChange(e.target.value)}
+              placeholder="Enter website URL (e.g., example.com)"
+              className={`w-full h-12 px-3 border rounded-lg focus:ring-2 focus:outline-none text-gray-800 transition-colors
+                ${isValidUrl 
+                  ? 'border-green-300 focus:ring-green-500 bg-green-50' 
+                  : 'border-gray-300 focus:ring-blue-500'
+                }`}
+              required
+              disabled={isLoading}
+            />
+            <div className="absolute left-0 right-0">
+              {url && !isValidUrl && (
+                <p className="text-sm text-gray-600 mb-4">
+                  Please enter a valid website URL (e.g., example.com)
+                </p>
+              )}
+              {isValidUrl && (
+                <p className="text-sm text-green-600 mt-2 mb-4">
+                  Will fetch: {normalizedUrl}
+                </p>
+              )}
+            </div>
+          </div>
           <button 
             type="submit"
-            disabled={isLoading}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
+            disabled={isLoading || !isValidUrl}
+            className="h-12 shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? (
               <>

@@ -8,79 +8,90 @@ interface StyleGuideDisplayProps {
 export default function StyleGuideDisplay({ styleGuide }: StyleGuideDisplayProps) {
   const [copied, setCopied] = useState(false);
   
-  // Function to copy style guide to clipboard
   const copyToClipboard = () => {
     navigator.clipboard.writeText(styleGuide);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  
-  // Function to format the style guide text with Markdown-like styling
-  const formatStyleGuide = () => {
-    // Split by sections (numbered items)
-    const sections = styleGuide.split(/\d+\.\s+/);
-    
-    // Remove the first empty section if it exists
-    const contentSections = sections.filter(section => section.trim().length > 0);
-    
-    // Extract section titles from the original text
-    const sectionTitles = styleGuide.match(/\d+\.\s+([^:]+):/g) || [];
-    
-    return (
-      <div className="space-y-6">
-        {contentSections.map((section, index) => {
-          // Extract section title
-          const titleMatch = sectionTitles[index]?.match(/\d+\.\s+([^:]+):/) || [];
-          const title = titleMatch[1] || `Section ${index + 1}`;
-          
-          // Format the section content
-          const formattedContent = section
-            .split('\n')
-            .map((line, i) => {
-              // Format list items
-              if (line.trim().startsWith('-')) {
+
+  // Function to format markdown-style content
+  const formatContent = (content: string) => {
+    // Split content into sections based on headings
+    const sections = content.split(/(?=^#+\s)/m).filter(Boolean);
+
+    return sections.map((section, index) => {
+      // Extract section title and content
+      const [title, ...contentLines] = section.split('\n');
+      const content = contentLines.join('\n').trim();
+
+      // Format the content
+      const formattedContent = content
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
+        .replace(/`([^`]+)`/g, '<code>$1</code>') // Code/color values
+        .replace(/^- (.*?)$/gm, '• $1') // Convert hyphens to bullets
+        .split('\n')
+        .filter(line => line.trim()) // Remove empty lines
+        .map(line => line.trim()); // Trim each line
+
+      return (
+        <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 mb-4">
+          <h3 className="text-lg font-semibold text-blue-600 mb-4">
+            {title.replace(/^#+\s/, '')}
+          </h3>
+          <div className="space-y-2">
+            {formattedContent.map((line, i) => {
+              if (line.startsWith('•')) {
+                // Bullet points
                 return (
-                  <li key={i} className="ml-6 list-disc text-gray-800">
-                    {line.trim().substring(1).trim()}
-                  </li>
+                  <div key={i} className="flex items-start gap-2 ml-2">
+                    <span className="text-blue-500 mt-1">•</span>
+                    <p 
+                      className="text-gray-700"
+                      dangerouslySetInnerHTML={{ 
+                        __html: line.substring(1).trim()
+                      }} 
+                    />
+                  </div>
+                );
+              } else if (line.includes('<code>')) {
+                // Lines with color codes
+                return (
+                  <div key={i} className="flex items-center gap-2">
+                    <p 
+                      className="text-gray-700"
+                      dangerouslySetInnerHTML={{ __html: line }}
+                    />
+                    {line.match(/`#[0-9a-fA-F]{6}`/) && (
+                      <div 
+                        className="w-4 h-4 rounded border border-gray-200" 
+                        style={{ 
+                          backgroundColor: line.match(/`(#[0-9a-fA-F]{6})`/)?.[1] || ''
+                        }}
+                      />
+                    )}
+                  </div>
+                );
+              } else {
+                // Regular text
+                return (
+                  <p 
+                    key={i} 
+                    className="text-gray-700"
+                    dangerouslySetInnerHTML={{ __html: line }}
+                  />
                 );
               }
-              
-              // Format headings (usually at the start of sections)
-              if (line.trim().endsWith(':') && !line.includes('-')) {
-                return (
-                  <h4 key={i} className="font-medium text-gray-900 mt-4">
-                    {line.trim()}
-                  </h4>
-                );
-              }
-              
-              // Regular text
-              return line.trim() ? (
-                <p key={i} className="text-gray-700">
-                  {line.trim()}
-                </p>
-              ) : null;
-            })
-            .filter(Boolean);
-          
-          return (
-            <div key={index} className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-blue-700 mb-3">{title}</h3>
-              <div className="space-y-2">
-                {formattedContent}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
+            })}
+          </div>
+        </div>
+      );
+    });
   };
-  
+
   return (
     <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium">Design Style Guide</h3>
+        <h2 className="text-xl font-semibold text-gray-900">Design Style Guide</h2>
         <button
           onClick={copyToClipboard}
           className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors"
@@ -97,10 +108,12 @@ export default function StyleGuideDisplay({ styleGuide }: StyleGuideDisplayProps
         </button>
       </div>
       
-      {formatStyleGuide()}
+      <div className="space-y-4">
+        {formatContent(styleGuide)}
+      </div>
       
       <div className="mt-4 text-sm text-gray-500">
-        <p>Use this style guide as a prompt with your favorite AI design tool</p>
+        <p>Use this style guide as inspiration for your design system</p>
       </div>
     </div>
   );

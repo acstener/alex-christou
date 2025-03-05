@@ -49,53 +49,54 @@ export async function POST(request: Request) {
     
     // Your custom prompt for design style guide extraction
     const promptTemplate = `
-      Analyze this website screenshot and provide a comprehensive design style guide with the following elements:
+      You are a seasoned UI/UX designer with an eye for design patterns and relationships. Analyze this website screenshot and create an inspirational design guide that captures the core visual language and feel of the interface.
       
-      1. Typography System:
-         - Complete type scale with exact metrics
-         - Font sizes, weights, line heights, and letter spacing
-         - Hierarchy and usage rules
-         - Font family specifications
-      
-      2. Spacing & Layout:
-         - Base unit and spacing scale
-         - Padding and margin rules
-         - Container widths and breakpoints
-         - Component density specifications
-         - Content-to-padding ratios
-         - Layout grid system
-      
-      3. Component Specifications:
-         - Detailed measurements for common components
-         - Internal spacing rules
-         - States and variations
-         - Visual treatments (shadows, borders, etc.)
-      
-      4. Color System:
-         - Complete color palette with hex codes
-         - Opacity variations
-         - Usage guidelines for each color
-         - State colors (hover, active, disabled)
-      
-      5. Visual Hierarchy:
-         - Opacity levels for different content types
-         - Z-index scale
-         - Element stacking rules
-         - Content prominence guidelines
-      
-      6. Motion & Animation:
-         - Transition timings
-         - Easing functions
-         - Animation patterns
-         - Interactive state behaviors
-      
-      7. Responsive Design:
-         - Breakpoint definitions
-         - Container behavior at each breakpoint
-         - Component adaptation rules
-         - Spacing adjustments per viewport
-      
-      Format this as a comprehensive design system prompt that can be used with AI design tools. Be specific and include exact values where possible (pixels, hex codes, etc.).
+      Extract and describe these key design elements:
+
+      1. Visual Style & Mood:
+         - Core brand colors (3-5 key colors with hex codes)
+         - Overall aesthetic direction (minimal, bold, playful, etc.)
+         - Visual tone and personality traits
+
+      2. Typography Fundamentals:
+         - Primary font families (heading and body)
+         - Key type scale relationships (not every size, just the pattern)
+         - Font weight usage patterns
+         - Standout text treatments and styles
+
+      3. Space & Rhythm:
+         - Base spacing unit if identifiable
+         - Content padding patterns
+         - Component spacing relationships
+         - Breathing room principles
+
+      4. Component Patterns:
+         - Button styling approach (shape, padding, states)
+         - Input field treatment
+         - Card/container styling patterns
+         - Interactive element behaviors
+         - Key component proportions
+
+      5. Visual Treatments:
+         - Shadow usage approach
+         - Border and corner radius patterns
+         - Key visual effects (subtle details that create the feel)
+         - Surface treatment patterns
+
+      6. Layout Framework:
+         - Main container approach
+         - Content width strategy
+         - Major breakpoint behavior (mobile vs desktop thinking)
+         - Component arrangement principles
+
+      7. Interactive Feel:
+         - State changes (hover, active, etc.)
+         - Transition characteristics
+         - Interactive feedback patterns
+
+      Extract these elements as a practical guide that captures the "vibe" and core design decisions, which can be used as inspiration rather than strict documentation. Include the most important measurements and values, but prioritize the overall patterns and relationships that give the interface its distinctive feel.
+
+      Focus on describing the design system in terms of relationships and patterns rather than exhaustive specifications. Highlight what makes this interface unique and how its various elements work together to create a cohesive experience.
     `;
     
     // Log the request being made to OpenAI for debugging

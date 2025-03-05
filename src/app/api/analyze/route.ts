@@ -156,13 +156,32 @@ export async function POST(request: Request) {
     if (!visionResponse.ok) {
       let errorData;
       try {
-        errorData = await visionResponse.json();
-        console.error('Vision API error data:', JSON.stringify(errorData, null, 2));
+        // Check content type of the error response
+        const contentType = visionResponse.headers.get('content-type');
+        console.error('Error response content type:', contentType);
+
+        if (contentType && contentType.includes('application/json')) {
+          // Handle JSON error response
+          errorData = await visionResponse.json();
+          console.error('Vision API error data:', JSON.stringify(errorData, null, 2));
+        } else {
+          // Handle non-JSON response (like HTML)
+          const textResponse = await visionResponse.text();
+          console.error('Non-JSON error response:', textResponse.substring(0, 500));
+          errorData = {
+            error: 'Non-JSON response received',
+            status: visionResponse.status,
+            statusText: visionResponse.statusText,
+            contentType,
+            responsePreview: textResponse.substring(0, 200)
+          };
+        }
       } catch (e) {
         console.error('Error parsing Vision API error response:', e);
         errorData = { 
           status: visionResponse.status, 
-          statusText: visionResponse.statusText 
+          statusText: visionResponse.statusText,
+          parseError: e instanceof Error ? e.message : String(e)
         };
       }
       
@@ -176,12 +195,25 @@ export async function POST(request: Request) {
         errorMessage = 'Vision API server error. Please try again later.';
       } else if (visionResponse.status === 400) {
         errorMessage = `Bad request to Vision API: ${errorData?.error?.message || 'Unknown error'}`;
+      } else if (visionResponse.status === 502) {
+        errorMessage = 'Vision API gateway error. The service might be temporarily unavailable.';
+      } else if (visionResponse.status === 504) {
+        errorMessage = 'Vision API request timed out. Please try again.';
       }
       
+      // Log the complete error information
+      console.error('Vision API Error:', {
+        status: visionResponse.status,
+        statusText: visionResponse.statusText,
+        errorMessage,
+        errorData
+      });
+
       return NextResponse.json(
         { 
           error: errorMessage,
-          details: errorData
+          details: errorData,
+          timestamp: new Date().toISOString()
         }, 
         { status: visionResponse.status || 500 }
       );

@@ -194,7 +194,7 @@ export async function POST(request: Request) {
     
     // Prepare the request body
     const requestBody = {
-      model: "gpt-4-vision-preview",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "user",
@@ -210,7 +210,7 @@ export async function POST(request: Request) {
           ]
         }
       ],
-      max_tokens: 2000
+      max_tokens: 300
     };
     
     // Log the full request body for debugging

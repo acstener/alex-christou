@@ -1,4 +1,75 @@
 import { NextResponse } from 'next/server';
+import { promises as fs } from 'fs';
+import path from 'path';
+import crypto from 'crypto';
+import os from 'os';
+
+// Define types for our cache
+interface CacheEntry {
+  timestamp: number;
+  data: {
+    success: boolean;
+    styleGuide: string;
+  };
+}
+
+// Helper functions for caching
+async function getCacheDir() {
+  // Use OS temp directory as base
+  const tempDir = path.join(os.tmpdir(), 'style-analysis-cache');
+  await fs.mkdir(tempDir, { recursive: true });
+  return tempDir;
+}
+
+async function getCachedResult(imageUrl: string): Promise<CacheEntry['data'] | null> {
+  try {
+    const hash = crypto.createHash('md5').update(imageUrl).digest('hex');
+    const cacheDir = await getCacheDir();
+    const cacheFile = path.join(cacheDir, `${hash}.json`);
+    
+    // Check if file exists and is not older than 24 hours
+    const stat = await fs.stat(cacheFile).catch(() => null);
+    if (stat && Date.now() - stat.mtimeMs < 24 * 60 * 60 * 1000) {
+      const data = await fs.readFile(cacheFile, 'utf8');
+      const cached: CacheEntry = JSON.parse(data);
+      console.log('Cache hit for:', imageUrl);
+      return cached.data;
+    }
+  } catch (error) {
+    console.error('Cache read error:', error);
+  }
+  return null;
+}
+
+async function setCachedResult(imageUrl: string, data: CacheEntry['data']) {
+  try {
+    const hash = crypto.createHash('md5').update(imageUrl).digest('hex');
+    const cacheDir = await getCacheDir();
+    const cacheFile = path.join(cacheDir, `${hash}.json`);
+    
+    const cacheEntry: CacheEntry = {
+      timestamp: Date.now(),
+      data
+    };
+    
+    await fs.writeFile(cacheFile, JSON.stringify(cacheEntry));
+    console.log('Cached result for:', imageUrl);
+  } catch (error) {
+    console.error('Cache write error:', error);
+  }
+}
+
+async function invalidateCache(imageUrl: string) {
+  try {
+    const hash = crypto.createHash('md5').update(imageUrl).digest('hex');
+    const cacheDir = await getCacheDir();
+    const cacheFile = path.join(cacheDir, `${hash}.json`);
+    await fs.unlink(cacheFile).catch(() => null);
+    console.log('Invalidated cache for:', imageUrl);
+  } catch (error) {
+    console.error('Cache invalidation error:', error);
+  }
+}
 
 export async function POST(request: Request) {
   const { imageUrl } = await request.json();
@@ -9,6 +80,12 @@ export async function POST(request: Request) {
   }
   
   try {
+    // Try to get cached result first
+    const cachedResult = await getCachedResult(imageUrl);
+    if (cachedResult) {
+      return NextResponse.json(cachedResult);
+    }
+    
     // Log the received image URL for debugging
     console.log('Analyze API received image URL:', imageUrl);
     
@@ -117,7 +194,7 @@ export async function POST(request: Request) {
     
     // Prepare the request body
     const requestBody = {
-      model: "gpt-4o", // Updated to use gpt-4o which has vision capabilities
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "user",
@@ -127,13 +204,13 @@ export async function POST(request: Request) {
               type: "image_url",
               image_url: {
                 url: imageUrl,
-                detail: "high" // Using high detail for better analysis
+                detail: "high"
               }
             }
           ]
         }
       ],
-      max_tokens: 2000
+      max_tokens: 300
     };
     
     // Log the full request body for debugging
@@ -154,6 +231,9 @@ export async function POST(request: Request) {
     console.log('Vision API response headers:', Object.fromEntries([...visionResponse.headers.entries()]));
     
     if (!visionResponse.ok) {
+      // If the API call fails, invalidate any existing cache for this URL
+      await invalidateCache(imageUrl);
+      
       let errorData;
       try {
         // Check content type of the error response
@@ -230,12 +310,16 @@ export async function POST(request: Request) {
     
     const styleGuide = visionData.choices[0].message.content;
     
+    // Cache the successful result
+    const result = { success: true, styleGuide };
+    await setCachedResult(imageUrl, result);
+    
     // Return the style guide
-    return NextResponse.json({
-      success: true,
-      styleGuide
-    });
+    return NextResponse.json(result);
   } catch (error) {
+    // If there's an error, invalidate any existing cache for this URL
+    await invalidateCache(imageUrl);
+    
     console.error('Unexpected error in analyze API:', error);
     return NextResponse.json(
       { error: 'Failed to analyze image', details: error instanceof Error ? error.message : String(error) }, 

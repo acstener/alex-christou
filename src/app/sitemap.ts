@@ -2,28 +2,32 @@ import { getPosts } from '@/lib/blog'
 import { MetadataRoute } from 'next'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Get all blog posts
   const posts = await getPosts()
   
-  const blogPosts = posts.map((post) => ({
-    url: `https://alexchristou.com/posts/${post.slug}`,
+  // Create sitemap entries for blog posts
+  const postEntries = posts.map((post) => ({
+    url: `https://stener.co.uk/posts/${post.slug}`,
     lastModified: new Date(post.date),
     changeFrequency: 'monthly' as const,
-    priority: 0.8,
+    priority: 0.7,
   }))
 
-  return [
+  // Base routes
+  const routes = [
     {
-      url: 'https://alexchristou.com',
+      url: 'https://stener.co.uk',
       lastModified: new Date(),
-      changeFrequency: 'daily',
+      changeFrequency: 'daily' as const,
       priority: 1,
     },
     {
-      url: 'https://alexchristou.com/posts',
+      url: 'https://stener.co.uk/posts',
       lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.9,
+      changeFrequency: 'daily' as const,
+      priority: 0.8,
     },
-    ...blogPosts,
   ]
+
+  return [...routes, ...postEntries]
 } 

@@ -3,7 +3,6 @@
 import React from 'react';
 import { useState } from 'react';
 import { Copy, CheckCircle, type LucideProps } from 'lucide-react';
-import { cn, patterns } from '@/lib/utils';
 
 interface FeedbackDisplayProps {
   feedback: string;
@@ -85,15 +84,15 @@ export default function FeedbackDisplay({ feedback }: FeedbackDisplayProps) {
       }
 
       return (
-        <div key={index} className={patterns.card}>
-          <h3 className={cn(patterns.heading.h3, "mb-4 text-blue-600")}>
+        <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 mb-4">
+          <h3 className="text-lg font-semibold text-blue-600 mb-4">
             {headerLine}
           </h3>
           <div className="space-y-3">
             {items.map((item, i) => (
               <div key={i} className="flex items-start gap-2">
                 <span className="text-blue-500 mt-1.5 flex-shrink-0">•</span>
-                <p className={cn(patterns.text.base, "flex-1 leading-relaxed")}>
+                <p className="text-gray-700 flex-1 leading-relaxed">
                   {formatBoldText(item)}
                 </p>
               </div>
@@ -106,7 +105,7 @@ export default function FeedbackDisplay({ feedback }: FeedbackDisplayProps) {
     return (
       <>
         {intro && intro.trim() && (
-          <div className={cn(patterns.text.base, "mb-6 leading-relaxed")}>
+          <div className="text-gray-700 mb-6 leading-relaxed">
             {formatBoldText(intro.trim())}
           </div>
         )}
@@ -116,9 +115,9 @@ export default function FeedbackDisplay({ feedback }: FeedbackDisplayProps) {
   };
 
   return (
-    <div className={cn(patterns.card, "bg-gray-50")}>
+    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className={patterns.heading.h2}>Design Feedback</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Design Feedback</h2>
         <button
           onClick={copyToClipboard}
           className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors"
@@ -139,8 +138,8 @@ export default function FeedbackDisplay({ feedback }: FeedbackDisplayProps) {
         {formatContent(feedback)}
       </div>
       
-      <div className="mt-4">
-        <p className={patterns.text.muted}>Use this feedback to improve your design</p>
+      <div className="mt-4 text-sm text-gray-500">
+        <p>Use this feedback to improve your design</p>
       </div>
     </div>
   );

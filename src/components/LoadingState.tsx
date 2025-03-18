@@ -1,21 +1,27 @@
 import { Loader2 } from 'lucide-react';
 
 interface LoadingStateProps {
-  stage: 'screenshot' | 'analysis';
+  stage: 'screenshot' | 'upload' | 'analysis';
 }
 
 export default function LoadingState({ stage }: LoadingStateProps) {
-  const message = stage === 'screenshot' 
-    ? 'Capturing website screenshot...' 
-    : 'Analyzing design and generating style guide...';
-  
+  const getMessage = () => {
+    switch (stage) {
+      case 'screenshot':
+        return 'Capturing screenshot...';
+      case 'upload':
+        return 'Uploading image...';
+      case 'analysis':
+        return 'Analyzing design...';
+      default:
+        return 'Processing...';
+    }
+  };
+
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 flex flex-col items-center justify-center">
-      <Loader2 className="animate-spin h-8 w-8 text-blue-500 mb-4" />
-      <p className="text-gray-600 text-center">
-        {message}<br />
-        <span className="text-sm text-gray-500">This may take a few seconds</span>
-      </p>
+    <div className="flex items-center justify-center p-8 text-gray-600">
+      <Loader2 className="animate-spin h-5 w-5 mr-2" />
+      <span>{getMessage()}</span>
     </div>
   );
 } 

@@ -5,7 +5,6 @@ import { getPosts } from '@/lib/blog';
 
 export default async function Home() {
   const posts = await getPosts();
-  const recentPosts = posts.slice(0, 5);
 
   return (
     <div className="min-h-screen bg-white">
@@ -27,9 +26,9 @@ export default async function Home() {
 
           <div className="space-y-8">
             <div>
-              <h2 className="text-xl font-bold mb-4 text-pink-500">LATEST ARTICLES</h2>
+              <h2 className="text-xl font-bold mb-4 text-pink-500">ALL ARTICLES</h2>
               <ul className="space-y-3">
-                {recentPosts.map((post) => (
+                {posts.map((post) => (
                   <li key={post.slug} className="flex items-start">
                     <span className="text-pink-500 mr-2 mt-1">―</span>
                     <Link 
@@ -41,15 +40,6 @@ export default async function Home() {
                   </li>
                 ))}
               </ul>
-            </div>
-
-            <div>
-              <Link 
-                href="/posts" 
-                className="text-base hover:underline"
-              >
-                More articles
-              </Link>
             </div>
 
             <div className="pt-8 border-t">
